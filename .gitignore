@@ -1,0 +1,29 @@
+# Dépendances
+node_modules/
+package-lock.json
+
+# Variables d'environnement (SECRETS)
+.env
+.env.local
+.env.production
+
+# Build
+dist/
+build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Système
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Couverture de tests
+coverage/
