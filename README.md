@@ -115,68 +115,6 @@ npm install
 npm run dev
 ```
 
----
-
-## 🌿 Conventions Git
-
-### Branches
-
-| **Type**       | **Format**       | **Exemple**             |
-| :------------- | :--------------- | :---------------------- |
-| Fonctionnalité | `feature/<nom>`  | `feature/auth-login`    |
-| Correction     | `fix/<nom>`      | `fix/task-status`       |
-| Documentation  | `docs/<nom>`     | `docs/api-endpoints`    |
-| Refactoring    | `refactor/<nom>` | `refactor/task-service` |
-| Tests          | `test/<nom>`     | `test/auth-endpoints`   |
-| Configuration  | `chore/<nom>`    | `chore/docker-setup`    |
-
-### Commits (Conventional Commits)
-
-Format : `<type>: <description>`
-
-| **Type**   | **Usage**               |
-| :--------- | :---------------------- |
-| `feat`     | Nouvelle fonctionnalité |
-| `fix`      | Correction de bug       |
-| `docs`     | Documentation           |
-| `style`    | Formatage               |
-| `refactor` | Refactoring             |
-| `test`     | Tests                   |
-| `chore`    | Configuration           |
-
----
-
-## 📝 Conventions de code
-
-| **Élément**        | **Convention**     | **Exemple**       |
-| :----------------- | :----------------- | :---------------- |
-| Dossier            | kebab-case         | `task-management` |
-| Composant React    | PascalCase         | `TaskCard.jsx`    |
-| Fichier utilitaire | camelCase          | `formatDate.js`   |
-| Variable           | camelCase          | `taskList`        |
-| Constante          | UPPER_SNAKE_CASE   | `MAX_FILE_SIZE`   |
-| Modèle             | PascalCase         | `Task`            |
-| Route API          | kebab-case pluriel | `/api/tasks`      |
-
----
-
-## 🎯 Definition of Done
-
-Une User Story est considérée comme terminée lorsque :
-
-* [ ] Le code est écrit et fonctionne
-* [ ] Le code respecte ESLint et Prettier
-* [ ] Les validations frontend et backend sont en place
-* [ ] Les erreurs sont gérées
-* [ ] Les permissions RBAC sont vérifiées
-* [ ] Les tests passent
-* [ ] Le responsive est vérifié
-* [ ] Les états loading / success / error / empty sont gérés
-* [ ] Le commit respecte les Conventional Commits
-* [ ] La documentation est à jour
-
----
-
 ## 📊 Statut du projet
 
 🚧 **En cours de développement — Sprint 1**

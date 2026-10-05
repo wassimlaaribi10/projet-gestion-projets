@@ -1,6 +1,6 @@
 # Guide de contribution
 
-Merci de votre intérêt pour ce projet. Ce document décrit les règles et le workflow à suivre pour contribuer efficacement.
+Ce document décrit les règles et le workflow à suivre pour ce projet.
 
 ---
 
@@ -10,17 +10,15 @@ Merci de votre intérêt pour ce projet. Ce document décrit les règles et le w
 2. [Workflow Git](#-workflow-git)
 3. [Conventions de branches](#-conventions-de-branches)
 4. [Conventions de commits](#-conventions-de-commits)
-5. [Pull Requests](#-pull-requests)
-6. [Conventions de code](#-conventions-de-code)
-7. [Definition of Done](#-definition-of-done)
-8. [Signaler un bug](#-signaler-un-bug)
-9. [Proposer une fonctionnalité](#-proposer-une-fonctionnalité)
+5. [Conventions de code](#-conventions-de-code)
+6. [Definition of Done](#-definition-of-done)
+7. [Règles absolues](#-règles-absolues)
+8. [Résumé ultra simple des étapes](#-résumé-ultra-simple-des-étapes)
+9. [Exemple concret](#-exemple-concret)
 
 ---
 
 ## ✅ Prérequis
-
-Avant de contribuer, assurez-vous d'avoir :
 
 * Node.js (version 18 ou supérieure)
 * npm
@@ -39,15 +37,14 @@ Le projet suit un workflow basé sur des branches dédiées.
 | **Branche** | **Rôle**                 |
 | :---------- | :----------------------- |
 | `main`      | Version stable, déployée |
-| `develop`   | Branche d'intégration    |
 
-### Étapes pour contribuer
+### Étapes pour ajouter une fonctionnalité
 
-1. **Récupérer la dernière version**
+1. **Se placer sur `main` et récupérer la dernière version**
 
    ```bash
-   git checkout develop
-   git pull origin develop
+   git checkout main
+   git pull origin main
    ```
 
 2. **Créer une branche de travail**
@@ -69,11 +66,15 @@ Le projet suit un workflow basé sur des branches dédiées.
    git push origin feature/nom-court
    ```
 
-5. **Ouvrir une Pull Request vers** `develop`
+5. **Merger la branche dans** `main`
 
-6. **Attendre la revue et merger**
+   ```bash
+   git checkout main
+   git merge feature/nom-court
+   git push origin main
+   ```
 
-7. **Supprimer la branche après merge**
+6. **Supprimer la branche après merge**
 
    ```bash
    git branch -d feature/nom-court
@@ -142,53 +143,6 @@ refactor: extract task logic into service
 
 ---
 
-## 🔀 Pull Requests
-
-### Avant d'ouvrir une PR
-
-* [ ] Le code fonctionne.
-* [ ] Les tests passent.
-* [ ] Le lint ne retourne aucune erreur.
-* [ ] La branche est à jour avec `develop`.
-* [ ] Les commits respectent les Conventional Commits.
-
-### Format d'une PR
-
-**Titre :**
-
-```text
-feat: add user registration
-```
-
-**Description :**
-
-```markdown
-## Description
-
-Brève description de la modification.
-
-## Type
-
-- [ ] Nouvelle fonctionnalité
-- [ ] Correction
-- [ ] Documentation
-- [ ] Refactoring
-- [ ] Tests
-
-## User Story concernée
-
-US-XXX
-
-## Checklist
-
-- [ ] Code testé
-- [ ] Tests ajoutés
-- [ ] Documentation mise à jour
-- [ ] Pas de secrets versionnés
-```
-
----
-
 ## 📐 Conventions de code
 
 | **Élément**        | **Convention**     | **Exemple**       |
@@ -227,32 +181,8 @@ Une User Story est considérée comme **terminée** lorsque :
 * [ ] Le responsive est vérifié (Desktop + Mobile).
 * [ ] Les états loading / success / error / empty sont gérés.
 * [ ] Le commit respecte les Conventional Commits.
-* [ ] La branche est mergée dans `develop`.
+* [ ] La branche est mergée dans `main`.
 * [ ] La documentation est à jour.
-
----
-
-## 🐛 Signaler un bug
-
-Ouvrir une **issue** sur GitHub avec :
-
-* **Titre :** description courte du bug.
-* **Description :** ce qui se passe vs ce qui devrait se passer.
-* **Étapes de reproduction :** liste numérotée.
-* **Environnement :** OS, navigateur, version de Node.js.
-* **Captures d'écran :** si pertinent.
-
----
-
-## 💡 Proposer une fonctionnalité
-
-Ouvrir une **issue** sur GitHub avec :
-
-* **Titre :** nom de la fonctionnalité.
-* **Problème :** quel besoin cela résout.
-* **Solution proposée :** description de la fonctionnalité.
-* **Alternatives :** autres solutions envisagées.
-* **Contexte additionnel :** maquettes, exemples.
 
 ---
 
@@ -260,7 +190,54 @@ Ouvrir une **issue** sur GitHub avec :
 
 * **Ne jamais** versionner de fichier `.env`.
 * **Ne jamais** commiter de secrets (clés API, mots de passe).
-* **Ne jamais** pousser directement sur `main` ou `develop`.
 * **Ne jamais** faire de commit massif du type `final project`.
 * **Toujours** tester avant de commiter.
 * **Toujours** utiliser un message de commit clair.
+
+---
+
+## 5. Résumé ultra simple des étapes
+
+Pour chaque nouvelle fonctionnalité, tu fais **toujours** ces 6 étapes :
+
+| Étape | Commande                                             | Pourquoi                               |
+| :---- | :--------------------------------------------------- | :------------------------------------- |
+| 1     | `git checkout main` + `git pull origin main`         | Se placer sur la version stable à jour |
+| 2     | `git checkout -b feature/ma-feature`                 | Créer une branche pour travailler      |
+| 3     | `git add .` + `git commit -m "feat: ..."`            | Enregistrer le travail                 |
+| 4     | `git push origin feature/ma-feature`                 | Envoyer sur GitHub                     |
+| 5     | `git checkout main` + `git merge feature/ma-feature` | Fusionner dans main                    |
+| 6     | `git branch -d feature/ma-feature`                   | Nettoyer la branche                    |
+
+---
+
+## 6. Exemple concret
+
+Imaginons que tu vas créer le formulaire de connexion.
+
+```powershell
+# Étape 1 — Se placer sur main
+git checkout main
+git pull origin main
+
+# Étape 2 — Créer une branche
+git checkout -b feature/auth-login
+
+# Étape 3 — Travailler et commiter
+# (tu écris ton code)
+git add .
+git commit -m "feat: add login form"
+
+# Étape 4 — Pousser sur GitHub
+git push origin feature/auth-login
+
+# Étape 5 — Merger dans main
+git checkout main
+git merge feature/auth-login
+git push origin main
+
+# Étape 6 — Supprimer la branche
+git branch -d feature/auth-login
+```
+
+**C'est tout.** Tu répètes ce cycle pour chaque fonctionnalité.
