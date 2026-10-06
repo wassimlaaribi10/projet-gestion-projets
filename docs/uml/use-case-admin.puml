@@ -1,0 +1,57 @@
+@startuml
+title Cas d'utilisation - Administrateur
+
+left to right direction
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+
+actor "Membre" as Membre
+actor "Administrateur" as Admin
+
+' Héritage du Membre
+Admin --|> Membre
+
+rectangle "Système de gestion de projets" {
+
+    package "Authentification" {
+        usecase "Se connecter" as UC01
+    }
+
+    package "Tableaux de bord" {
+        usecase "Dashboard global" as UC40
+    }
+
+    package "Suivi" {
+        usecase "Consulter le journal d'activité" as UC50
+    }
+
+    package "Gestion des utilisateurs" {
+        usecase "Lister les utilisateurs" as UC60
+        usecase "Modifier le rôle d'un utilisateur" as UC61
+        usecase "Désactiver un compte" as UC62
+    }
+}
+
+' Associations de l'Administrateur
+Admin --> UC40
+Admin --> UC50
+Admin --> UC61
+Admin --> UC62
+
+' Relations <<include>>
+UC40 ..> UC01 : <<include>>
+UC50 ..> UC01 : <<include>>
+UC60 ..> UC01 : <<include>>
+
+UC61 ..> UC60 : <<include>>
+
+UC62 ..> UC60 : <<include>>
+
+@enduml

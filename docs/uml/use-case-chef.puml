@@ -1,0 +1,124 @@
+@startuml
+title Cas d'utilisation - Chef de projet
+
+left to right direction
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+
+actor "Membre" as Membre
+actor "Chef de projet" as Chef
+
+' Héritage
+Chef --|> Membre
+
+rectangle "Système de gestion de projets" {
+
+    package "Projets" {
+
+        usecase "Créer un projet" as UC10
+        usecase "Modifier un projet" as UC11
+        usecase "Archiver un projet" as UC12
+        usecase "Rechercher un projet" as UC14
+        usecase "Filtrer les projets" as UC15
+        usecase "Ajouter un membre" as UC17
+        usecase "Retirer un membre" as UC18
+    }
+
+    package "Tâches" {
+
+        usecase "Créer une tâche" as UC20
+        usecase "Modifier une tâche" as UC21
+        usecase "Supprimer une tâche" as UC22
+        usecase "Assigner une tâche" as UC23
+        usecase "Rechercher une tâche" as UC25
+        usecase "Filtrer les tâches" as UC26
+    }
+
+    package "Communication" {
+
+        usecase "Mentionner un utilisateur" as UC31
+    }
+
+    package "Suivi" {
+
+        usecase "Consulter le journal d'activité" as UC50
+    }
+
+    ' Cas hérités nécessaires aux relations
+    package "Fonctionnalités héritées" {
+
+        usecase "Se connecter" as UC01
+        usecase "Consulter la liste des projets" as UC13
+        usecase "Consulter le détail d'un projet" as UC16
+        usecase "Commenter une tâche" as UC30
+    }
+}
+
+' Associations propres au Chef de projet
+
+Chef --> UC10
+Chef --> UC11
+Chef --> UC12
+Chef --> UC14
+Chef --> UC15
+Chef --> UC17
+Chef --> UC18
+
+Chef --> UC20
+Chef --> UC21
+Chef --> UC22
+Chef --> UC23
+Chef --> UC25
+Chef --> UC26
+
+
+Chef --> UC50
+
+' Relations <<include>>
+
+UC10 ..> UC01 : <<include>>
+UC11 ..> UC01 : <<include>>
+UC12 ..> UC01 : <<include>>
+
+UC14 ..> UC01 : <<include>>
+UC14 ..> UC13 : <<include>>
+
+UC15 ..> UC01 : <<include>>
+UC15 ..> UC13 : <<include>>
+
+UC17 ..> UC01 : <<include>>
+UC18 ..> UC01 : <<include>>
+
+UC20 ..> UC01 : <<include>>
+UC20 ..> UC16 : <<include>>
+
+UC21 ..> UC01 : <<include>>
+UC21 ..> UC16 : <<include>>
+
+UC22 ..> UC01 : <<include>>
+UC22 ..> UC16 : <<include>>
+
+UC23 ..> UC01 : <<include>>
+UC23 ..> UC16 : <<include>>
+
+UC25 ..> UC01 : <<include>>
+UC25 ..> UC16 : <<include>>
+
+UC26 ..> UC01 : <<include>>
+UC26 ..> UC16 : <<include>>
+
+UC31 ..> UC01 : <<include>>
+
+UC50 ..> UC01 : <<include>>
+
+' Relation <<extend>>
+UC31 ..> UC30 : <<extend>>
+
+@enduml

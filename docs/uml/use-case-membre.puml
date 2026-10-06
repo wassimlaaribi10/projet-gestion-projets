@@ -1,0 +1,84 @@
+@startuml
+title Cas d'utilisation - Membre
+
+left to right direction
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+
+actor "Membre" as Membre
+
+rectangle "Système de gestion de projets" {
+
+    package "Compte" {
+        usecase "Se connecter" as UC01
+        usecase "Se déconnecter" as UC02
+        usecase "Consulter son profil" as UC03
+        usecase "Modifier son profil" as UC04
+        usecase "Changer mot de passe" as UC05
+    }
+
+    package "Projets" {
+        usecase "Consulter la liste des projets" as UC13
+        usecase "Consulter le détail d'un projet" as UC16
+    }
+
+    package "Tâches" {
+        usecase "Changer le statut d'une tâche" as UC24
+    }
+
+    package "Commentaires" {
+        usecase "Commenter une tâche" as UC30
+        usecase "Consulter l'historique des commentaires" as UC32
+    }
+
+    package "Notifications" {
+        usecase "Consulter ses notifications" as UC33
+        usecase "Marquer comme lue" as UC34
+    }
+
+    package "Tableau de bord" {
+        usecase "Dashboard projet" as UC41
+    }
+}
+
+Membre --> UC02
+Membre --> UC03
+Membre --> UC04
+Membre --> UC05
+Membre --> UC13
+Membre --> UC16
+Membre --> UC24
+Membre --> UC30
+Membre --> UC32
+Membre --> UC33
+Membre --> UC41
+
+UC02 ..> UC01 : <<include>>
+UC03 ..> UC01 : <<include>>
+UC04 ..> UC01 : <<include>>
+UC05 ..> UC01 : <<include>>
+UC13 ..> UC01 : <<include>>
+UC16 ..> UC01 : <<include>>
+
+UC24 ..> UC01 : <<include>>
+UC24 ..> UC16 : <<include>>
+
+UC30 ..> UC01 : <<include>>
+UC30 ..> UC16 : <<include>>
+
+UC32 ..> UC01 : <<include>>
+UC32 ..> UC16 : <<include>>
+
+UC33 ..> UC01 : <<include>>
+UC34 ..> UC33 : <<extend>>
+UC41 ..> UC01 : <<include>>
+
+
+@enduml
