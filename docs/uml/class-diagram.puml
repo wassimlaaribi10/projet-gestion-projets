@@ -1,0 +1,197 @@
+@startuml Diagramme_Classes
+!theme cerulean-outline
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam nodesep 60
+skinparam ranksep 70
+skinparam dpi 150
+
+skinparam class {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 1.5
+    FontSize 12
+    AttributeFontSize 11
+    AttributeFontColor #0D47A1
+}
+
+skinparam enum {
+    BackgroundColor #FFF9C4
+    BorderColor #F57F17
+    BorderThickness 1.5
+}
+
+' ============================================
+' ÉNUMÉRATIONS
+' ============================================
+enum UserRole {
+    admin
+    chef_projet
+    membre
+}
+
+enum ProjectStatus {
+    actif
+    archive
+}
+
+enum ProjectPriority {
+    basse
+    moyenne
+    haute
+}
+
+enum TaskStatus {
+    a_faire
+    en_cours
+    en_revue
+    terminee
+}
+
+enum TaskPriority {
+    basse
+    moyenne
+    haute
+    urgente
+}
+
+enum NotificationType {
+    tache_assignee
+    mention
+    echeance
+    projet_ajout
+}
+
+enum LogAction {
+    create
+    update
+    delete
+    assign
+}
+
+enum EntityType {
+    project
+    task
+    comment
+}
+
+' ============================================
+' CLASSES
+' ============================================
+
+class User {
+    - _id : ObjectId
+    - nom : String
+    - prenom : String
+    - email : String
+    - password : String
+    - role : UserRole
+    - avatar : String
+    - actif : Boolean
+    - dateCreation : Date
+    - derniereConnexion : Date
+}
+
+class Project {
+    - _id : ObjectId
+    - nom : String
+    - description : String
+    - statut : ProjectStatus
+    - priorite : ProjectPriority
+    - dateDebut : Date
+    - dateFinPrevue : Date
+    - proprietaire : ObjectId
+    - tags : Array<String>
+    - couleur : String
+    - dateCreation : Date
+}
+
+class Member {
+    - user : ObjectId
+    - role : UserRole
+    - dateAjout : Date
+}
+
+class Task {
+    - _id : ObjectId
+    - titre : String
+    - description : String
+    - projet : ObjectId
+    - statut : TaskStatus
+    - priorite : TaskPriority
+    - assigneA : ObjectId
+    - createur : ObjectId
+    - dateEcheance : Date
+    - dateDebut : Date
+    - dateFin : Date
+    - estimation : Number
+    - tempsPasse : Number
+    - tags : Array<String>
+    - ordre : Number
+    - dateCreation : Date
+}
+
+class Comment {
+    - _id : ObjectId
+    - contenu : String
+    - auteur : ObjectId
+    - tache : ObjectId
+    - mentions : Array<ObjectId>
+    - dateCreation : Date
+    - dateModification : Date
+}
+
+class Notification {
+    - _id : ObjectId
+    - destinataire : ObjectId
+    - type : NotificationType
+    - message : String
+    - lien : String
+    - lue : Boolean
+    - reference : Object
+    - dateCreation : Date
+}
+
+class ActivityLog {
+    - _id : ObjectId
+    - utilisateur : ObjectId
+    - action : LogAction
+    - entiteType : EntityType
+    - entiteId : ObjectId
+    - projet : ObjectId
+    - details : Object
+    - dateCreation : Date
+}
+
+' ============================================
+' RELATIONS
+' ============================================
+
+User "1" -- "0..*" Project : est propriétaire de >
+Project "1" *-- "0..*" Task : contient >
+User "1" -- "0..*" Task : a créé >
+User "0..1" -- "0..*" Task : est assigné à >
+Task "1" *-- "0..*" Comment : contient >
+User "1" -- "0..*" Comment : a écrit >
+User "0..*" -- "0..*" Comment : est mentionné dans >
+User "1" -- "0..*" Notification : reçoit >
+User "1" -- "0..*" ActivityLog : a effectué >
+Project "0..1" -- "0..*" ActivityLog : concerne >
+Project "1" *-- "1..*" Member : a pour équipe >
+Member "1" -- "0..*" User : représente >
+
+' ============================================
+' LIENS AVEC LES ÉNUMÉRATIONS
+' ============================================
+User ..> UserRole
+Project ..> ProjectStatus
+Project ..> ProjectPriority
+Task ..> TaskStatus
+Task ..> TaskPriority
+Notification ..> NotificationType
+ActivityLog ..> LogAction
+ActivityLog ..> EntityType
+
+@enduml
