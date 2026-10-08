@@ -1,18 +1,13 @@
 // ============================================
-// Point d'entrée du serveur backend
+// Point d'entrée du serveur
 // ============================================
 
-const http = require('http');
+const app = require('./src/app');
 
-const PORT = 5000;
-
-// Création d'un serveur HTTP minimal
-const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Backend opérationnel\n');
-});
+const PORT = process.env.PORT || 5000;
 
 // Démarrage du serveur
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Serveur démarré sur http://localhost:${PORT}`);
+  console.log(`Environnement : ${process.env.NODE_ENV || 'development'}`);
 });
