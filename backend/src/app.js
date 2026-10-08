@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'API opérationnelle 5',
+    message: 'API opérationnelle',
     timestamp: new Date().toISOString(),
   });
 });
