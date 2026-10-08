@@ -1,0 +1,19 @@
+{
+  "name": "gestion-projets-backend",
+  "version": "1.0.0",
+  "description": "API REST pour la plateforme collaborative de gestion de projets",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "mern",
+    "express",
+    "mongodb",
+    "api",
+    "gestion-projets"
+  ],
+  "author": "LAARIBI WASSIM",
+  "license": "ISC"
+}
