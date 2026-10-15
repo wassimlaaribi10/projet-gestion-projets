@@ -3,44 +3,27 @@
 // ============================================
 
 const express = require('express');
+const errorHandler = require('./middlewares/errorMiddleware');
+const notFound = require('./middlewares/notFoundMiddleware');
+const projectRoutes = require('./routes/projectRoutes');
 
 const app = express();
 
-// ============================================
-// Middlewares globaux
-// ============================================
-
-// Parser le JSON dans les requêtes
+// Parser le JSON
 app.use(express.json());
 
-// Parser les données de formulaires
-app.use(express.urlencoded({ extended: true }));
-
-// ============================================
-// Route de santé (health check)
-// ============================================
-
+// Route de santé
 app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'API opérationnelle',
-    timestamp: new Date().toISOString(),
-  });
+  res.json({ success: true, message: 'API opérationnelle' });
 });
 
-// ============================================
-// Route 404 (par défaut)
-// ============================================
+// Routes API
+app.use('/api/projects', projectRoutes);
 
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route introuvable',
-  });
-});
+// 404 (après les routes)
+app.use(notFound);
 
-// ============================================
-// Export de l'application
-// ============================================
+// Gestion des erreurs (en dernier)
+app.use(errorHandler);
 
 module.exports = app;
