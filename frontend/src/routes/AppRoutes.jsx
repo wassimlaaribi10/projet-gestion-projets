@@ -13,6 +13,7 @@ import ProjectList from '../features/projects/pages/ProjectList';
 import ProjectDetail from '../features/projects/pages/ProjectDetail';
 import ProjectForm from '../features/projects/pages/ProjectForm';
 import TaskDetail from '../features/tasks/pages/TaskDetail';
+import Notifications from '../features/notifications/pages/Notifications';
 
 function AppRoutes() {
   return (
@@ -35,6 +36,8 @@ function AppRoutes() {
     <Route path="/projects/new" element={<ProjectForm />} />
     <Route path="/projects/:id" element={<ProjectDetail />} />
     <Route path="/tasks/:id" element={<TaskDetail />} />
+    <Route path="/notifications" element={<Notifications />} />
+
   </Route>
 </Route>
         </Route>
