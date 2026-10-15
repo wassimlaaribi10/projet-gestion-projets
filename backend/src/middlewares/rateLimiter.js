@@ -4,14 +4,13 @@
 
 const rateLimit = require('express-rate-limit');
 
-// En développement : pas de limite
-// En production : limites strictes
-const isDevelopment = process.env.NODE_ENV === 'development';
+// Désactiver le rate limiting en développement ET en test
+// (activé uniquement en production)
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Limite pour l'authentification (register/login)
-const authLimiter = isDevelopment
-  ? (req, res, next) => next() // pas de limite en dev
-  : rateLimit({
+const authLimiter = isProduction
+  ? rateLimit({
       windowMs: 15 * 60 * 1000,
       max: 10,
       message: {
@@ -20,12 +19,12 @@ const authLimiter = isDevelopment
       },
       standardHeaders: true,
       legacyHeaders: false,
-    });
+    })
+  : (req, res, next) => next();
 
 // Limite globale pour les routes API
-const apiLimiter = isDevelopment
-  ? (req, res, next) => next() // pas de limite en dev
-  : rateLimit({
+const apiLimiter = isProduction
+  ? rateLimit({
       windowMs: 15 * 60 * 1000,
       max: 100,
       message: {
@@ -34,7 +33,8 @@ const apiLimiter = isDevelopment
       },
       standardHeaders: true,
       legacyHeaders: false,
-    });
+    })
+  : (req, res, next) => next();
 
 module.exports = {
   authLimiter,
