@@ -16,6 +16,7 @@ const taskRoutes = require('./routes/taskRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const activityLogRoutes = require('./routes/activityLogRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -60,6 +61,7 @@ app.use('/api/tasks', apiLimiter, taskRoutes);
 app.use('/api/comments', apiLimiter, commentRoutes);
 app.use('/api/notifications', apiLimiter, notificationRoutes);
 app.use('/api/activity-logs', apiLimiter, activityLogRoutes);
+app.use('/api/users', apiLimiter, userRoutes);
 
 // ============================================
 // 404 puis erreurs

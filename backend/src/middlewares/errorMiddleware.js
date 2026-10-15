@@ -1,7 +1,7 @@
 // ============================================
 // Middleware de gestion des erreurs
 // ============================================
-
+// eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
   // 1. Erreur de validation Mongoose
   if (err.name === 'ValidationError') {
