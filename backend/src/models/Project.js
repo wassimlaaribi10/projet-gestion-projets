@@ -104,11 +104,10 @@ projectSchema.index({ statut: 1 });
 projectSchema.index({ dateCreation: -1 });
 
 // Validation : dateFinPrevue doit être > dateDebut
-projectSchema.pre('save', function (next) {
+projectSchema.pre('save', async function () {
   if (this.dateFinPrevue && this.dateDebut && this.dateFinPrevue <= this.dateDebut) {
-    return next(new Error('La date de fin doit être postérieure à la date de début'));
+    throw new Error('La date de fin doit être postérieure à la date de début');
   }
-  next();
 });
 
 const Project = mongoose.model('Project', projectSchema);

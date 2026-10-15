@@ -4,8 +4,11 @@
 
 const express = require('express');
 const controller = require('../controllers/notificationController');
+const authenticate = require('../middlewares/authMiddleware');
 
 const router = express.Router();
+
+router.use(authenticate);
 
 router.post('/', controller.createNotification);
 router.get('/', controller.getAllNotifications);

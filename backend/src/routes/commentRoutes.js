@@ -4,8 +4,11 @@
 
 const express = require('express');
 const controller = require('../controllers/commentController');
+const authenticate = require('../middlewares/authMiddleware');
 
 const router = express.Router();
+
+router.use(authenticate);
 
 router.post('/', controller.createComment);
 router.get('/', controller.getAllComments);

@@ -4,18 +4,17 @@
 
 const express = require('express');
 const authController = require('../controllers/authController');
+const authenticate = require('../middlewares/authMiddleware');
 const validate = require('../middlewares/validateMiddleware');
 const { registerValidator, loginValidator } = require('../validators/authValidator');
 
 const router = express.Router();
 
-// POST /api/auth/register
+// Routes publiques
 router.post('/register', registerValidator, validate, authController.register);
-
-// POST /api/auth/login
 router.post('/login', loginValidator, validate, authController.login);
 
-// GET /api/auth/me
-router.get('/me', authController.getMe);
+// Route protégée
+router.get('/me', authenticate, authController.getMe);
 
 module.exports = router;
