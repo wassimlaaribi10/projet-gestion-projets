@@ -16,5 +16,6 @@ router.get('/', controller.getAllProjects);
 router.get('/:id', controller.getProjectById);
 router.put('/:id', controller.updateProject);
 router.patch('/:id/archive', controller.archiveProject);
+router.post('/:id/members', controller.addMember);
 
 module.exports = router;

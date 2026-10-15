@@ -4,6 +4,23 @@
 
 const projectService = require('../services/projectService');
 
+// POST /api/projects/:id/members
+const addMember = async (req, res, next) => {
+  try {
+    const { userId, role } = req.body;
+
+    const project = await projectService.addMember(req.params.id, userId, role);
+
+    res.status(200).json({
+      success: true,
+      message: 'Membre ajouté',
+      data: project,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // POST /api/projects
 const createProject = async (req, res, next) => {
   try {
@@ -84,4 +101,5 @@ module.exports = {
   getProjectById,
   updateProject,
   archiveProject,
+  addMember,
 };

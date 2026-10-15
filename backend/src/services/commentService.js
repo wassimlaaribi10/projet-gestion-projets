@@ -2,6 +2,7 @@
 // Service Comment : logique métier
 // ============================================
 
+const createNotification = require('../utils/createNotification');
 const { Comment, Task } = require('../models');
 
 // Créer un commentaire
@@ -15,9 +16,30 @@ const createComment = async (data) => {
   }
 
   const comment = await Comment.create(data);
+
+  // Créer des notifications pour les utilisateurs mentionnés
+  if (data.mentions && data.mentions.length > 0) {
+    for (const userId of data.mentions) {
+      // Ne pas se notifier soi-même
+      if (userId.toString() === data.auteur.toString()) continue;
+
+      try {
+        await createNotification({
+          destinataire: userId,
+          type: 'mention',
+          message: `Vous avez été mentionné dans un commentaire sur "${task.titre}"`,
+          lien: `/tasks/${task._id}`,
+          entiteType: 'comment',
+          entiteId: comment._id,
+        });
+      } catch (err) {
+        console.error('Erreur création notification mention :', err.message);
+      }
+    }
+  }
+
   return comment;
 };
-
 // Lister les commentaires (filtre par tâche)
 const getAllComments = async (query) => {
   const page = Number(query.page) || 1;

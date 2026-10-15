@@ -2,6 +2,7 @@
 // Service Task : logique métier
 // ============================================
 
+const createNotification = require('../utils/createNotification');
 const { Task, Project } = require('../models');
 
 // Créer une tâche
@@ -81,8 +82,29 @@ const updateTask = async (id, data) => {
     throw error;
   }
 
+  // Vérifier si l'assigné a changé
+  const oldAssignee = task.assigneA?.toString();
+  const newAssignee = data.assigneA?.toString();
+
   Object.assign(task, data);
   await task.save();
+
+  // Créer une notification si un nouvel utilisateur est assigné
+  if (newAssignee && newAssignee !== oldAssignee) {
+    try {
+      await createNotification({
+        destinataire: newAssignee,
+        type: 'tache_assignee',
+        message: `Vous avez été assigné à la tâche "${task.titre}"`,
+        lien: `/tasks/${task._id}`,
+        entiteType: 'task',
+        entiteId: task._id,
+      });
+    } catch (err) {
+      // Ne pas bloquer si la notification échoue
+      console.error('Erreur création notification :', err.message);
+    }
+  }
 
   return task;
 };
