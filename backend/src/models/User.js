@@ -80,19 +80,14 @@ userSchema.index({ role: 1 });
 // Middleware pre-save : hashage du mot de passe
 // ============================================
 
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
   // Ne hasher que si le mot de passe a été modifié
   if (!this.isModified('password')) {
-    return next();
+    return;
   }
 
-  try {
-    const salt = await bcrypt.genSalt(SALT_ROUNDS);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
+  const salt = await bcrypt.genSalt(SALT_ROUNDS);
+  this.password = await bcrypt.hash(this.password, salt);
 });
 
 // ============================================
