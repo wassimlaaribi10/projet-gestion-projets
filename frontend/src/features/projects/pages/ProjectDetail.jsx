@@ -7,6 +7,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 
 import projectService from '../services/projectService';
 import taskService from '../../tasks/services/taskService';
+import statsService from '../../dashboard/services/statsService';
 import TaskCard from '../../tasks/components/TaskCard';
 import { useAuth } from '../../../context/AuthContext';
 import { Button, Card, Badge, Input } from '../../../components/ui';
@@ -19,6 +20,7 @@ function ProjectDetail() {
   // États
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('infos');
@@ -27,17 +29,34 @@ function ProjectDetail() {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [showTaskForm, setShowTaskForm] = useState(false);
 
-  // Charger le projet et ses tâches au montage
+  // Formulaire édition projet
+  const [editData, setEditData] = useState({
+    nom: '',
+    description: '',
+    priorite: 'moyenne',
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  // Charger le projet, ses tâches et ses stats
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [projectRes, tasksRes] = await Promise.all([
+        const [projectRes, tasksRes, statsRes] = await Promise.all([
           projectService.getById(id),
           taskService.getByProject(id),
+          statsService.getProject(id),
         ]);
 
         setProject(projectRes.data);
         setTasks(tasksRes.data);
+        setStats(statsRes.data);
+
+        // Initialiser le formulaire d'édition
+        setEditData({
+          nom: projectRes.data.nom || '',
+          description: projectRes.data.description || '',
+          priorite: projectRes.data.priorite || 'moyenne',
+        });
       } catch (err) {
         const message = err.response?.data?.message || 'Erreur lors du chargement';
         setError(message);
@@ -65,6 +84,10 @@ function ProjectDetail() {
       setTasks([response.data, ...tasks]);
       setNewTaskTitle('');
       setShowTaskForm(false);
+
+      // Recharger les stats
+      const statsRes = await statsService.getProject(id);
+      setStats(statsRes.data);
     } catch (err) {
       const message =
         err.response?.data?.message ||
@@ -75,7 +98,33 @@ function ProjectDetail() {
     }
   };
 
-  // États
+  // Mettre à jour le projet
+  const handleUpdateProject = async (e) => {
+    e.preventDefault();
+
+    setSavingEdit(true);
+
+    try {
+      // 1. Envoyer la modification
+      await projectService.update(id, editData);
+
+      // 2. Recharger le projet complet (avec populate)
+      const projectRes = await projectService.getById(id);
+      setProject(projectRes.data);
+
+      // 3. Retourner à l'onglet Informations
+      setActiveTab('infos');
+
+      // 4. Message de succès
+      alert('Projet modifié avec succès');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur lors de la modification');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  // États de chargement
   if (loading) {
     return <p className="text-neutral text-center py-12">Chargement...</p>;
   }
@@ -105,6 +154,9 @@ function ProjectDetail() {
     archive: 'default',
   };
 
+  // Vérifier si l'utilisateur est propriétaire
+  const isOwner = project.proprietaire?._id === user._id;
+
   return (
     <div>
       {/* En-tête */}
@@ -128,10 +180,10 @@ function ProjectDetail() {
       </div>
 
       {/* Onglets */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200">
+      <div className="flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto">
         <button
           onClick={() => setActiveTab('infos')}
-          className={`px-4 py-2 font-medium ${
+          className={`px-4 py-2 font-medium whitespace-nowrap ${
             activeTab === 'infos'
               ? 'text-primary border-b-2 border-primary'
               : 'text-neutral hover:text-primary'
@@ -141,7 +193,7 @@ function ProjectDetail() {
         </button>
         <button
           onClick={() => setActiveTab('membres')}
-          className={`px-4 py-2 font-medium ${
+          className={`px-4 py-2 font-medium whitespace-nowrap ${
             activeTab === 'membres'
               ? 'text-primary border-b-2 border-primary'
               : 'text-neutral hover:text-primary'
@@ -151,7 +203,7 @@ function ProjectDetail() {
         </button>
         <button
           onClick={() => setActiveTab('taches')}
-          className={`px-4 py-2 font-medium ${
+          className={`px-4 py-2 font-medium whitespace-nowrap ${
             activeTab === 'taches'
               ? 'text-primary border-b-2 border-primary'
               : 'text-neutral hover:text-primary'
@@ -159,6 +211,28 @@ function ProjectDetail() {
         >
           Tâches ({tasks.length})
         </button>
+        <button
+          onClick={() => setActiveTab('stats')}
+          className={`px-4 py-2 font-medium whitespace-nowrap ${
+            activeTab === 'stats'
+              ? 'text-primary border-b-2 border-primary'
+              : 'text-neutral hover:text-primary'
+          }`}
+        >
+          Statistiques
+        </button>
+        {isOwner && (
+          <button
+            onClick={() => setActiveTab('edit')}
+            className={`px-4 py-2 font-medium whitespace-nowrap ${
+              activeTab === 'edit'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-neutral hover:text-primary'
+            }`}
+          >
+            Modifier
+          </button>
+        )}
       </div>
 
       {/* Onglet Informations */}
@@ -261,6 +335,171 @@ function ProjectDetail() {
             </div>
           )}
         </div>
+      )}
+
+      {/* Onglet Statistiques */}
+      {activeTab === 'stats' && stats && (
+        <div className="space-y-6">
+          {/* Cartes résumées */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <p className="text-sm text-neutral">Total tâches</p>
+              <p className="text-3xl font-bold text-primary mt-1">{stats.totalTasks}</p>
+            </Card>
+            <Card>
+              <p className="text-sm text-neutral">Terminées</p>
+              <p className="text-3xl font-bold text-success mt-1">
+                {stats.tasksByStatus.terminee}
+              </p>
+            </Card>
+            <Card>
+              <p className="text-sm text-neutral">En retard</p>
+              <p className="text-3xl font-bold text-danger mt-1">{stats.lateTasks}</p>
+            </Card>
+          </div>
+
+          {/* Progression */}
+          <Card>
+            <h2 className="text-lg font-semibold mb-4">Progression</h2>
+            <div className="w-full bg-neutral-light rounded-full h-4">
+              <div
+                className="h-4 rounded-full bg-success transition-all"
+                style={{ width: `${stats.progression}%` }}
+              />
+            </div>
+            <p className="text-sm text-neutral mt-2">
+              {stats.progression}% des tâches terminées
+            </p>
+          </Card>
+
+          {/* Répartition par statut */}
+          <Card>
+            <h2 className="text-lg font-semibold mb-4">Tâches par statut</h2>
+            <div className="space-y-3">
+              {Object.entries(stats.tasksByStatus).map(([statut, count]) => {
+                const total = stats.totalTasks || 1;
+                const percent = Math.round((count / total) * 100);
+
+                const labels = {
+                  a_faire: 'À faire',
+                  en_cours: 'En cours',
+                  en_revue: 'En revue',
+                  terminee: 'Terminée',
+                };
+
+                const colors = {
+                  a_faire: 'bg-gray-400',
+                  en_cours: 'bg-primary',
+                  en_revue: 'bg-warning',
+                  terminee: 'bg-success',
+                };
+
+                return (
+                  <div key={statut}>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-neutral-dark">{labels[statut]}</span>
+                      <span className="text-neutral">
+                        {count} ({percent}%)
+                      </span>
+                    </div>
+                    <div className="w-full bg-neutral-light rounded-full h-2">
+                      <div
+                        className={`h-2 rounded-full ${colors[statut]}`}
+                        style={{ width: `${percent}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+
+          {/* Charge par membre */}
+          <Card>
+            <h2 className="text-lg font-semibold mb-4">Charge par membre</h2>
+            {stats.workloadByMember.length === 0 ? (
+              <p className="text-sm text-neutral">Aucune tâche assignée.</p>
+            ) : (
+              <div className="space-y-2">
+                {stats.workloadByMember.map((member) => (
+                  <div
+                    key={member.userId}
+                    className="flex justify-between p-3 bg-neutral-light rounded-lg"
+                  >
+                    <span className="text-sm font-medium">
+                      {member.prenom} {member.nom}
+                    </span>
+                    <span className="text-sm text-neutral">{member.count} tâche(s)</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </div>
+      )}
+
+      {/* Onglet Modifier */}
+      {activeTab === 'edit' && isOwner && (
+        <Card>
+          <h2 className="text-lg font-semibold mb-4">Modifier le projet</h2>
+
+          <form onSubmit={handleUpdateProject}>
+            <Input
+              label="Nom du projet"
+              name="nom"
+              value={editData.nom}
+              onChange={(e) => setEditData({ ...editData, nom: e.target.value })}
+              required
+            />
+
+            <div className="mb-4">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-neutral-dark mb-1"
+              >
+                Description
+              </label>
+              <textarea
+                id="description"
+                value={editData.description}
+                onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label
+                htmlFor="priorite"
+                className="block text-sm font-medium text-neutral-dark mb-1"
+              >
+                Priorité
+              </label>
+              <select
+                id="priorite"
+                value={editData.priorite}
+                onChange={(e) => setEditData({ ...editData, priorite: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="basse">Basse</option>
+                <option value="moyenne">Moyenne</option>
+                <option value="haute">Haute</option>
+              </select>
+            </div>
+
+            <div className="flex gap-3">
+              <Button type="submit" disabled={savingEdit}>
+                {savingEdit ? 'Enregistrement...' : 'Enregistrer'}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => setActiveTab('infos')}
+              >
+                Annuler
+              </Button>
+            </div>
+          </form>
+        </Card>
       )}
     </div>
   );

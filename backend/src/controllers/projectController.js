@@ -24,7 +24,7 @@ const addMember = async (req, res, next) => {
 // POST /api/projects
 const createProject = async (req, res, next) => {
   try {
-    const project = await projectService.createProject(req.body);
+    const project = await projectService.createProject(req.body, req.user.id);
 
     res.status(201).json({
       success: true,
@@ -68,7 +68,7 @@ const getProjectById = async (req, res, next) => {
 // PUT /api/projects/:id
 const updateProject = async (req, res, next) => {
   try {
-    const project = await projectService.updateProject(req.params.id, req.body);
+    const project = await projectService.updateProject(req.params.id, req.body, req.user.id);
 
     res.status(200).json({
       success: true,
@@ -83,7 +83,7 @@ const updateProject = async (req, res, next) => {
 // PATCH /api/projects/:id/archive
 const archiveProject = async (req, res, next) => {
   try {
-    const project = await projectService.archiveProject(req.params.id);
+    const project = await projectService.archiveProject(req.params.id, req.user.id);
 
     res.status(200).json({
       success: true,

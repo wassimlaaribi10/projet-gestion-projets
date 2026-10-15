@@ -2,6 +2,7 @@
 // Service Comment : logique métier
 // ============================================
 
+const logActivity = require('../utils/logActivity');
 const createNotification = require('../utils/createNotification');
 const { Comment, Task } = require('../models');
 
@@ -37,7 +38,16 @@ const createComment = async (data) => {
       }
     }
   }
-
+  if (data.auteur) {
+    await logActivity({
+      utilisateur: data.auteur,
+      action: 'create',
+      entiteType: 'comment',
+      entiteId: comment._id,
+      projet: task.projet,
+      details: { tache: task._id },
+    });
+  }
   return comment;
 };
 // Lister les commentaires (filtre par tâche)
@@ -101,13 +111,23 @@ const updateComment = async (id, data) => {
 };
 
 // Supprimer un commentaire
-const deleteComment = async (id) => {
+const deleteComment = async (id, userId = null) => {
   const comment = await Comment.findByIdAndDelete(id);
 
   if (!comment) {
     const error = new Error('Commentaire introuvable');
     error.status = 404;
     throw error;
+  }
+
+  if (userId) {
+    await logActivity({
+      utilisateur: userId,
+      action: 'delete',
+      entiteType: 'comment',
+      entiteId: comment._id,
+      details: {},
+    });
   }
 
   return comment;

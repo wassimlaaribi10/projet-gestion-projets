@@ -2,12 +2,12 @@
 // Service Task : logique métier
 // ============================================
 
+const logActivity = require('../utils/logActivity');
 const createNotification = require('../utils/createNotification');
 const { Task, Project } = require('../models');
 
 // Créer une tâche
-const createTask = async (data) => {
-  // Vérifier que le projet existe
+const createTask = async (data, userId = null) => {
   const project = await Project.findById(data.projet);
   if (!project) {
     const error = new Error('Projet introuvable');
@@ -16,6 +16,18 @@ const createTask = async (data) => {
   }
 
   const task = await Task.create(data);
+
+  if (userId) {
+    await logActivity({
+      utilisateur: userId,
+      action: 'create',
+      entiteType: 'task',
+      entiteId: task._id,
+      projet: task.projet,
+      details: { titre: task.titre },
+    });
+  }
+
   return task;
 };
 
@@ -73,7 +85,7 @@ const getTaskById = async (id) => {
 };
 
 // Modifier une tâche
-const updateTask = async (id, data) => {
+const updateTask = async (id, data, userId = null) => {
   const task = await Task.findById(id);
 
   if (!task) {
@@ -105,18 +117,39 @@ const updateTask = async (id, data) => {
       console.error('Erreur création notification :', err.message);
     }
   }
+  if (userId) {
+    await logActivity({
+      utilisateur: userId,
+      action: 'update',
+      entiteType: 'task',
+      entiteId: task._id,
+      projet: task.projet,
+      details: { modifications: Object.keys(data) },
+    });
+  }
 
   return task;
 };
 
 // Supprimer une tâche
-const deleteTask = async (id) => {
+const deleteTask = async (id, userId = null) => {
   const task = await Task.findByIdAndDelete(id);
 
   if (!task) {
     const error = new Error('Tâche introuvable');
     error.status = 404;
     throw error;
+  }
+
+  if (userId) {
+    await logActivity({
+      utilisateur: userId,
+      action: 'delete',
+      entiteType: 'task',
+      entiteId: task._id,
+      projet: task.projet,
+      details: { titre: task.titre },
+    });
   }
 
   return task;

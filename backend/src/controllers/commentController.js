@@ -66,7 +66,7 @@ const updateComment = async (req, res, next) => {
 // DELETE /api/comments/:id
 const deleteComment = async (req, res, next) => {
   try {
-    await commentService.deleteComment(req.params.id);
+    await commentService.deleteComment(req.params.id, req.user.id);
 
     res.status(200).json({
       success: true,

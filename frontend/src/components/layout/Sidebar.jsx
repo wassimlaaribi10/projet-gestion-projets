@@ -41,6 +41,9 @@ function Sidebar() {
         <NavLink to="/profile" className={linkClass}>
           👤 Profil
         </NavLink>
+        <NavLink to="/activity" className={linkClass}>
+          📋 Journal d'activité
+        </NavLink>
       </nav>
 
       {/* Utilisateur + Déconnexion */}

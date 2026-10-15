@@ -7,7 +7,7 @@ const taskService = require('../services/taskService');
 // POST /api/tasks
 const createTask = async (req, res, next) => {
   try {
-    const task = await taskService.createTask(req.body);
+    const task = await taskService.createTask(req.body, req.user.id);
 
     res.status(201).json({
       success: true,
@@ -51,7 +51,7 @@ const getTaskById = async (req, res, next) => {
 // PUT /api/tasks/:id
 const updateTask = async (req, res, next) => {
   try {
-    const task = await taskService.updateTask(req.params.id, req.body);
+    const task = await taskService.updateTask(req.params.id, req.body, req.user.id);
 
     res.status(200).json({
       success: true,
@@ -66,7 +66,7 @@ const updateTask = async (req, res, next) => {
 // DELETE /api/tasks/:id
 const deleteTask = async (req, res, next) => {
   try {
-    await taskService.deleteTask(req.params.id);
+    await taskService.deleteTask(req.params.id, req.user.id);
 
     res.status(200).json({
       success: true,

@@ -2,6 +2,7 @@
 // Service Project : logique métier
 // ============================================
 
+const logActivity = require('../utils/logActivity');
 const createNotification = require('../utils/createNotification');
 const { Project } = require('../models');
 
@@ -46,8 +47,21 @@ const addMember = async (projectId, userId, role = 'membre') => {
 };
 
 // Créer un projet
-const createProject = async (data) => {
+const createProject = async (data, userId = null) => {
   const project = await Project.create(data);
+
+  // Enregistrer l'action dans le journal
+  if (userId) {
+    await logActivity({
+      utilisateur: userId,
+      action: 'create',
+      entiteType: 'project',
+      entiteId: project._id,
+      projet: project._id,
+      details: { nom: project.nom },
+    });
+  }
+
   return project;
 };
 
@@ -92,7 +106,7 @@ const getProjectById = async (id) => {
   return project;
 };
 // Modifier un projet
-const updateProject = async (id, data) => {
+const updateProject = async (id, data, userId = null) => {
   const project = await Project.findById(id);
 
   if (!project) {
@@ -104,11 +118,24 @@ const updateProject = async (id, data) => {
   Object.assign(project, data);
   await project.save();
 
-  return project;
+  // Enregistrer l'action
+  if (userId) {
+    await logActivity({
+      utilisateur: userId,
+      action: 'update',
+      entiteType: 'project',
+      entiteId: project._id,
+      projet: project._id,
+      details: { modifications: Object.keys(data) },
+    });
+  }
+  return await Project.findById(project._id)
+    .populate('proprietaire', 'nom prenom email')
+    .populate('membres.user', 'nom prenom email');
 };
 
 // Archiver un projet
-const archiveProject = async (id) => {
+const archiveProject = async (id, userId = null) => {
   const project = await Project.findById(id);
 
   if (!project) {
@@ -119,6 +146,18 @@ const archiveProject = async (id) => {
 
   project.statut = 'archive';
   await project.save();
+
+  // Enregistrer l'action
+  if (userId) {
+    await logActivity({
+      utilisateur: userId,
+      action: 'update',
+      entiteType: 'project',
+      entiteId: project._id,
+      projet: project._id,
+      details: { statut: 'archive' },
+    });
+  }
 
   return project;
 };
