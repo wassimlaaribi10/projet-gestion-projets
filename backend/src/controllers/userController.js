@@ -66,7 +66,7 @@ const changePassword = async (req, res, next) => {
     const isMatch = await user.comparePassword(oldPassword);
     if (!isMatch) {
       const error = new Error('Ancien mot de passe incorrect');
-      error.status = 401;
+      error.status = 400;
       throw error;
     }
 

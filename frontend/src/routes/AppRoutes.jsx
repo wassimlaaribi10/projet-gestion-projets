@@ -1,7 +1,3 @@
-// ============================================
-// Routes de l'application
-// ============================================
-
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import ProtectedRoute from './ProtectedRoute';
@@ -10,8 +6,8 @@ import Login from '../features/auth/pages/Login';
 import Register from '../features/auth/pages/Register';
 import Dashboard from '../features/dashboard/pages/Dashboard';
 import ProjectList from '../features/projects/pages/ProjectList';
-import ProjectDetail from '../features/projects/pages/ProjectDetail';
 import ProjectForm from '../features/projects/pages/ProjectForm';
+import ProjectDetail from '../features/projects/pages/ProjectDetail';
 import TaskDetail from '../features/tasks/pages/TaskDetail';
 import Notifications from '../features/notifications/pages/Notifications';
 import Profile from '../features/auth/pages/Profile';
@@ -19,31 +15,27 @@ import Profile from '../features/auth/pages/Profile';
 function AppRoutes() {
   return (
     <Routes>
+      {/* Route racine → redirection */}
       <Route path="/" element={<Navigate to="/login" replace />} />
 
+      {/* Routes publiques */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
+      {/* Routes protégées avec Layout */}
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/projects" element={<ProjectList />} />
           <Route path="/projects/new" element={<ProjectForm />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
-        <Route element={<ProtectedRoute />}>
-  <Route element={<Layout />}>
-    <Route path="/dashboard" element={<Dashboard />} />
-    <Route path="/projects" element={<ProjectList />} />
-    <Route path="/projects/new" element={<ProjectForm />} />
-    <Route path="/projects/:id" element={<ProjectDetail />} />
-    <Route path="/tasks/:id" element={<TaskDetail />} />
-    <Route path="/notifications" element={<Notifications />} />
-    <Route path="/profile" element={<Profile />} />
-  </Route>
-</Route>
+          <Route path="/tasks/:id" element={<TaskDetail />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>
 
+      {/* 404 */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

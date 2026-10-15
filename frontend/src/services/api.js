@@ -39,12 +39,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Si le token est expiré ou invalide (401)
-    if (error.response && error.response.status === 401) {
+    // Ne pas déconnecter sur les routes publiques
+    const url = error.config?.url || '';
+    const isAuthRoute = url.includes('/auth/login') || url.includes('/auth/register');
+
+    if (error.response && error.response.status === 401 && !isAuthRoute) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
 
-      // Rediriger vers login (sauf si on est déjà sur login)
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }

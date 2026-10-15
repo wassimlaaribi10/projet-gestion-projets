@@ -1,7 +1,3 @@
-// ============================================
-// Composant racine
-// ============================================
-
 import AppRoutes from './routes/AppRoutes';
 
 function App() {
