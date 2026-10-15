@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
+import api from '../../../services/api';
 import projectService from '../services/projectService';
 import taskService from '../../tasks/services/taskService';
 import statsService from '../../dashboard/services/statsService';
@@ -17,7 +18,7 @@ function ProjectDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // États
+  // États généraux
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [stats, setStats] = useState(null);
@@ -37,18 +38,28 @@ function ProjectDetail() {
   });
   const [savingEdit, setSavingEdit] = useState(false);
 
-  // Charger le projet, ses tâches et ses stats
+  // Filtres des tâches
+  const [filters, setFilters] = useState({
+    statut: '',
+    priorite: '',
+    assigneA: '',
+  });
+
+  // Compteur de rechargement (pour forcer le refresh)
+  const [refresh, setRefresh] = useState(0);
+
+  // ============================================
+  // Charger projet + stats au montage
+  // ============================================
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [projectRes, tasksRes, statsRes] = await Promise.all([
+        const [projectRes, statsRes] = await Promise.all([
           projectService.getById(id),
-          taskService.getByProject(id),
           statsService.getProject(id),
         ]);
 
         setProject(projectRes.data);
-        setTasks(tasksRes.data);
         setStats(statsRes.data);
 
         // Initialiser le formulaire d'édition
@@ -68,22 +79,50 @@ function ProjectDetail() {
     fetchData();
   }, [id]);
 
+  // ============================================
+  // Charger les tâches (avec filtres)
+  // ============================================
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchTasks = async () => {
+      try {
+        const params = new URLSearchParams();
+        params.append('projet', id);
+        if (filters.statut) params.append('statut', filters.statut);
+        if (filters.priorite) params.append('priorite', filters.priorite);
+        if (filters.assigneA) params.append('assigneA', filters.assigneA);
+
+        const response = await api.get(`/tasks?${params.toString()}`);
+        setTasks(response.data.data);
+      } catch (err) {
+        console.error('Erreur chargement tâches :', err);
+      }
+    };
+
+    fetchTasks();
+  }, [filters, id, refresh]);
+
+  // ============================================
   // Créer une nouvelle tâche
+  // ============================================
   const handleCreateTask = async (e) => {
     e.preventDefault();
 
     if (!newTaskTitle.trim()) return;
 
     try {
-      const response = await taskService.create({
+      await taskService.create({
         titre: newTaskTitle,
         projet: id,
         createur: user._id,
       });
 
-      setTasks([response.data, ...tasks]);
       setNewTaskTitle('');
       setShowTaskForm(false);
+
+      // Forcer le rechargement des tâches
+      setRefresh((r) => r + 1);
 
       // Recharger les stats
       const statsRes = await statsService.getProject(id);
@@ -98,24 +137,22 @@ function ProjectDetail() {
     }
   };
 
+  // ============================================
   // Mettre à jour le projet
+  // ============================================
   const handleUpdateProject = async (e) => {
     e.preventDefault();
 
     setSavingEdit(true);
 
     try {
-      // 1. Envoyer la modification
       await projectService.update(id, editData);
 
-      // 2. Recharger le projet complet (avec populate)
+      // Recharger le projet complet
       const projectRes = await projectService.getById(id);
       setProject(projectRes.data);
 
-      // 3. Retourner à l'onglet Informations
       setActiveTab('infos');
-
-      // 4. Message de succès
       alert('Projet modifié avec succès');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur lors de la modification');
@@ -124,7 +161,9 @@ function ProjectDetail() {
     }
   };
 
+  // ============================================
   // États de chargement
+  // ============================================
   if (loading) {
     return <p className="text-neutral text-center py-12">Chargement...</p>;
   }
@@ -142,7 +181,9 @@ function ProjectDetail() {
 
   if (!project) return null;
 
+  // ============================================
   // Libellés
+  // ============================================
   const priorityVariant = {
     basse: 'default',
     moyenne: 'info',
@@ -154,7 +195,6 @@ function ProjectDetail() {
     archive: 'default',
   };
 
-  // Vérifier si l'utilisateur est propriétaire
   const isOwner = project.proprietaire?._id === user._id;
 
   return (
@@ -305,6 +345,67 @@ function ProjectDetail() {
             </Button>
           </div>
 
+          {/* Barre de filtres */}
+          <Card className="mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div>
+                <label className="block text-xs font-medium mb-1">Statut</label>
+                <select
+                  value={filters.statut}
+                  onChange={(e) => setFilters({ ...filters, statut: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Tous</option>
+                  <option value="a_faire">À faire</option>
+                  <option value="en_cours">En cours</option>
+                  <option value="en_revue">En revue</option>
+                  <option value="terminee">Terminée</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium mb-1">Priorité</label>
+                <select
+                  value={filters.priorite}
+                  onChange={(e) => setFilters({ ...filters, priorite: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Toutes</option>
+                  <option value="basse">Basse</option>
+                  <option value="moyenne">Moyenne</option>
+                  <option value="haute">Haute</option>
+                  <option value="urgente">Urgente</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium mb-1">Assigné à</label>
+                <select
+                  value={filters.assigneA}
+                  onChange={(e) => setFilters({ ...filters, assigneA: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Tous</option>
+                  {project.membres?.map((membre) => (
+                    <option key={membre.user._id} value={membre.user._id}>
+                      {membre.user.prenom} {membre.user.nom}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-end">
+                <Button
+                  variant="secondary"
+                  onClick={() => setFilters({ statut: '', priorite: '', assigneA: '' })}
+                  className="w-full"
+                >
+                  Réinitialiser
+                </Button>
+              </div>
+            </div>
+          </Card>
+
           {/* Formulaire nouvelle tâche */}
           {showTaskForm && (
             <Card className="mb-4">
@@ -325,7 +426,7 @@ function ProjectDetail() {
           {/* Liste des tâches */}
           {tasks.length === 0 ? (
             <Card className="text-center py-8">
-              <p className="text-neutral">Aucune tâche pour l&apos;instant.</p>
+              <p className="text-neutral">Aucune tâche ne correspond aux critères.</p>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -340,7 +441,6 @@ function ProjectDetail() {
       {/* Onglet Statistiques */}
       {activeTab === 'stats' && stats && (
         <div className="space-y-6">
-          {/* Cartes résumées */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
               <p className="text-sm text-neutral">Total tâches</p>
@@ -358,7 +458,6 @@ function ProjectDetail() {
             </Card>
           </div>
 
-          {/* Progression */}
           <Card>
             <h2 className="text-lg font-semibold mb-4">Progression</h2>
             <div className="w-full bg-neutral-light rounded-full h-4">
@@ -372,7 +471,6 @@ function ProjectDetail() {
             </p>
           </Card>
 
-          {/* Répartition par statut */}
           <Card>
             <h2 className="text-lg font-semibold mb-4">Tâches par statut</h2>
             <div className="space-y-3">
@@ -414,7 +512,6 @@ function ProjectDetail() {
             </div>
           </Card>
 
-          {/* Charge par membre */}
           <Card>
             <h2 className="text-lg font-semibold mb-4">Charge par membre</h2>
             {stats.workloadByMember.length === 0 ? (
@@ -491,10 +588,7 @@ function ProjectDetail() {
               <Button type="submit" disabled={savingEdit}>
                 {savingEdit ? 'Enregistrement...' : 'Enregistrer'}
               </Button>
-              <Button
-                variant="secondary"
-                onClick={() => setActiveTab('infos')}
-              >
+              <Button variant="secondary" onClick={() => setActiveTab('infos')}>
                 Annuler
               </Button>
             </div>
