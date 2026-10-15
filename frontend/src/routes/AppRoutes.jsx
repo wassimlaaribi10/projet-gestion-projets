@@ -4,6 +4,7 @@
 
 import { Routes, Route, Navigate } from 'react-router-dom';
 
+import ProtectedRoute from './ProtectedRoute';
 import Layout from '../components/layout/Layout';
 import Login from '../features/auth/pages/Login';
 import Register from '../features/auth/pages/Register';
@@ -19,10 +20,13 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Routes protégées (avec Layout) */}
-      <Route element={<Layout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        {/* On ajoutera d'autres routes ici plus tard */}
+      {/* Routes protégées */}
+      <Route element={<ProtectedRoute />}>
+        {/* Le Layout s'applique à toutes ces routes */}
+        <Route element={<Layout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          {/* Autres routes protégées à ajouter plus tard */}
+        </Route>
       </Route>
 
       {/* Route 404 */}
