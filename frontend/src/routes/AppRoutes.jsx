@@ -4,6 +4,7 @@
 
 import { Routes, Route, Navigate } from 'react-router-dom';
 
+import Layout from '../components/layout/Layout';
 import Login from '../features/auth/pages/Login';
 import Register from '../features/auth/pages/Register';
 import Dashboard from '../features/dashboard/pages/Dashboard';
@@ -18,8 +19,11 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Routes protégées (seront protégées à l'étape 5.12) */}
-      <Route path="/dashboard" element={<Dashboard />} />
+      {/* Routes protégées (avec Layout) */}
+      <Route element={<Layout />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        {/* On ajoutera d'autres routes ici plus tard */}
+      </Route>
 
       {/* Route 404 */}
       <Route path="*" element={<Navigate to="/login" replace />} />
