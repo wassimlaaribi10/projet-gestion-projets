@@ -30,19 +30,16 @@ function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
         <NavLink to="/dashboard" className={linkClass}>
-          📊 Tableau de bord
+          <span aria-hidden="true">📊</span> Tableau de bord
         </NavLink>
         <NavLink to="/projects" className={linkClass}>
-          📁 Projets
+          <span aria-hidden="true">📁</span> Projets
         </NavLink>
         <NavLink to="/notifications" className={linkClass}>
-          🔔 Notifications
+          <span aria-hidden="true">🔔</span> Notifications
         </NavLink>
         <NavLink to="/profile" className={linkClass}>
-          👤 Profil
-        </NavLink>
-        <NavLink to="/activity" className={linkClass}>
-          📋 Journal d'activité
+          <span aria-hidden="true">👤</span> Profil
         </NavLink>
       </nav>
 
@@ -58,7 +55,7 @@ function Sidebar() {
           onClick={handleLogout}
           className="w-full text-left px-4 py-2 text-sm text-danger hover:bg-red-50 rounded-lg"
         >
-          🚪 Se déconnecter
+          <span aria-hidden="true">🚪</span> Se déconnecter
         </button>
       </div>
     </aside>

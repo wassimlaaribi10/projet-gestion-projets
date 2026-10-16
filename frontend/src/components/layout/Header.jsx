@@ -29,9 +29,9 @@ function Header() {
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="text-2xl text-neutral-dark"
-          aria-label="Menu"
+          aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu de navigation'}
         >
-          ☰
+          <span aria-hidden="true">{menuOpen ? '✕' : '☰'}</span>
         </button>
       </div>
 
@@ -39,16 +39,16 @@ function Header() {
       {menuOpen && (
         <nav className="border-t border-gray-200 p-4 space-y-1">
           <NavLink to="/dashboard" className={linkClass} onClick={() => setMenuOpen(false)}>
-            📊 Tableau de bord
+            <span aria-hidden="true">📊</span> Tableau de bord
           </NavLink>
           <NavLink to="/projects" className={linkClass} onClick={() => setMenuOpen(false)}>
-            📁 Projets
+            <span aria-hidden="true">📁</span> Projets
           </NavLink>
           <NavLink to="/notifications" className={linkClass} onClick={() => setMenuOpen(false)}>
-            🔔 Notifications
+            <span aria-hidden="true">🔔</span> Notifications
           </NavLink>
           <NavLink to="/profile" className={linkClass} onClick={() => setMenuOpen(false)}>
-            👤 Profil
+            <span aria-hidden="true">👤</span> Profil
           </NavLink>
 
           <hr className="my-2" />
@@ -64,7 +64,7 @@ function Header() {
             onClick={handleLogout}
             className="w-full text-left px-4 py-2 text-sm text-danger hover:bg-red-50 rounded-lg"
           >
-            🚪 Se déconnecter
+            <span aria-hidden="true">🚪</span> Se déconnecter
           </button>
         </nav>
       )}

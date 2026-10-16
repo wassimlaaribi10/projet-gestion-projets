@@ -106,8 +106,7 @@ function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-light px-4 py-8">
-      <Card className="w-full max-w-md">
+      <main className="min-h-screen flex items-center justify-center bg-neutral-light px-4 py-8">      <Card className="w-full max-w-md">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-primary">Gestion de Projets</h1>
           <p className="text-neutral mt-1">Créez votre compte</p>
@@ -182,12 +181,11 @@ function Register() {
 
         <p className="text-center text-sm text-neutral mt-6">
           Déjà un compte ?{' '}
-          <Link to="/login" className="text-primary hover:underline font-medium">
-            Se connecter
+          <Link to="/login" className="text-primary-dark hover:underline font-medium">              Se connecter
           </Link>
         </p>
       </Card>
-    </div>
+    </main>
   );
 }
 

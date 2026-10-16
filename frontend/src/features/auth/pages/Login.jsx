@@ -12,27 +12,21 @@ function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  // State du formulaire
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  // State de la requête
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Soumission du formulaire
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Empêche le rechargement de la page
+    e.preventDefault();
 
     setError('');
     setLoading(true);
 
     try {
       await login(email, password);
-      // Redirection vers le dashboard après connexion
       navigate('/dashboard');
     } catch (err) {
-      // Afficher le message d'erreur du backend
       const message =
         err.response?.data?.message || 'Erreur de connexion. Veuillez réessayer.';
       setError(message);
@@ -42,11 +36,11 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-light px-4">
+    <main className="min-h-screen flex items-center justify-center bg-neutral-light px-4">
       <Card className="w-full max-w-md">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-primary">Gestion de Projets</h1>
-          <p className="text-neutral mt-1">Connectez-vous à votre compte</p>
+          <h1 className="text-2xl font-bold text-primary-dark">Gestion de Projets</h1>
+          <p className="text-neutral-dark mt-1">Connectez-vous à votre compte</p>
         </div>
 
         {error && (
@@ -81,14 +75,14 @@ function Login() {
           </Button>
         </form>
 
-        <p className="text-center text-sm text-neutral mt-6">
+        <p className="text-center text-sm text-neutral-dark mt-6">
           Pas encore de compte ?{' '}
-          <Link to="/register" className="text-primary hover:underline font-medium">
+          <Link to="/register" className="text-primary-dark hover:underline font-medium">
             S&apos;inscrire
           </Link>
         </p>
       </Card>
-    </div>
+    </main>
   );
 }
 

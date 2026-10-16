@@ -16,9 +16,9 @@
   --color-danger: #ef4444;
   --color-info: #06b6d4;
 
-  /* Couleurs neutres */
+  /* Couleurs neutres (contraste amélioré) */
   --color-neutral-dark: #1f2937;
-  --color-neutral: #6b7280;
+  --color-neutral: #4b5563;
   --color-neutral-light: #f3f4f6;
 }
 
