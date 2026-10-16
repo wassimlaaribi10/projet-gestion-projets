@@ -39,7 +39,7 @@ const createProject = async (req, res, next) => {
 // GET /api/projects
 const getAllProjects = async (req, res, next) => {
   try {
-    const result = await projectService.getAllProjects(req.query);
+    const result = await projectService.getAllProjects(req.query, req.user.id);
 
     res.status(200).json({
       success: true,
@@ -68,7 +68,11 @@ const getProjectById = async (req, res, next) => {
 // PUT /api/projects/:id
 const updateProject = async (req, res, next) => {
   try {
-    const project = await projectService.updateProject(req.params.id, req.body, req.user.id);
+    const project = await projectService.updateProject(
+      req.params.id,
+      req.body,
+      req.user.id // ← INDISPENSABLE pour la vérification du propriétaire
+    );
 
     res.status(200).json({
       success: true,

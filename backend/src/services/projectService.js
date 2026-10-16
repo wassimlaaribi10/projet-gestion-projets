@@ -2,11 +2,161 @@
 // Service Project : logique métier
 // ============================================
 
-const logActivity = require('../utils/logActivity');
-const createNotification = require('../utils/createNotification');
 const { Project } = require('../models');
+const createNotification = require('../utils/createNotification');
+const logActivity = require('../utils/logActivity');
 
+// ============================================
+// Créer un projet
+// ============================================
+const createProject = async (data, userId = null) => {
+  // Ajouter le propriétaire et le premier membre (chef de projet)
+  const project = await Project.create({
+    ...data,
+    proprietaire: userId,
+    membres: [{ user: userId, role: 'chef_projet' }],
+  });
+
+  // Enregistrer l'action dans le journal
+  if (userId) {
+    await logActivity({
+      utilisateur: userId,
+      action: 'create',
+      entiteType: 'project',
+      entiteId: project._id,
+      projet: project._id,
+      details: { nom: project.nom },
+    });
+  }
+
+  return project;
+};
+
+// ============================================
+// Lister les projets de l'utilisateur connecté
+// ============================================
+const getAllProjects = async (query = {}, userId = null) => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  // Filtre : uniquement les projets où il est propriétaire OU membre
+  const filter = userId ? { $or: [{ proprietaire: userId }, { 'membres.user': userId }] } : {};
+
+  const projects = await Project.find(filter)
+    .populate('proprietaire', 'nom prenom email')
+    .populate('membres.user', 'nom prenom email')
+    .sort('-dateCreation')
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Project.countDocuments(filter);
+
+  return {
+    projects,
+    pagination: {
+      total,
+      page,
+      limit,
+      pages: Math.ceil(total / limit),
+    },
+  };
+};
+
+// ============================================
+// Récupérer un projet par ID
+// ============================================
+const getProjectById = async (id) => {
+  const project = await Project.findById(id)
+    .populate('proprietaire', 'nom prenom email')
+    .populate('membres.user', 'nom prenom email');
+
+  if (!project) {
+    const error = new Error('Projet introuvable');
+    error.status = 404;
+    throw error;
+  }
+
+  return project;
+};
+
+// ============================================
+// Modifier un projet
+// ============================================
+const updateProject = async (id, data, userId = null) => {
+  const project = await Project.findById(id);
+
+  if (!project) {
+    const error = new Error('Projet introuvable');
+    error.status = 404;
+    throw error;
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire
+  if (userId && project.proprietaire.toString() !== userId.toString()) {
+    const error = new Error('Seul le propriétaire peut modifier ce projet');
+    error.status = 403;
+    throw error;
+  }
+
+  Object.assign(project, data);
+  await project.save();
+
+  // Enregistrer l'action
+  if (userId) {
+    await logActivity({
+      utilisateur: userId,
+      action: 'update',
+      entiteType: 'project',
+      entiteId: project._id,
+      projet: project._id,
+      details: { modifications: Object.keys(data) },
+    });
+  }
+
+  return project;
+};
+
+// ============================================
+// Archiver un projet
+// ============================================
+const archiveProject = async (id, userId = null) => {
+  const project = await Project.findById(id);
+
+  if (!project) {
+    const error = new Error('Projet introuvable');
+    error.status = 404;
+    throw error;
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire
+  if (userId && project.proprietaire.toString() !== userId.toString()) {
+    const error = new Error('Seul le propriétaire peut archiver ce projet');
+    error.status = 403;
+    throw error;
+  }
+
+  project.statut = 'archive';
+  await project.save();
+
+  // Enregistrer l'action
+  if (userId) {
+    await logActivity({
+      utilisateur: userId,
+      action: 'update',
+      entiteType: 'project',
+      entiteId: project._id,
+      projet: project._id,
+      details: { statut: 'archive' },
+    });
+  }
+
+  return project;
+};
+
+// ============================================
 // Ajouter un membre à un projet
+// ============================================
 const addMember = async (projectId, userId, role = 'membre') => {
   const project = await Project.findById(projectId);
 
@@ -46,122 +196,9 @@ const addMember = async (projectId, userId, role = 'membre') => {
   return project;
 };
 
-// Créer un projet
-const createProject = async (data, userId = null) => {
-  const project = await Project.create(data);
-
-  // Enregistrer l'action dans le journal
-  if (userId) {
-    await logActivity({
-      utilisateur: userId,
-      action: 'create',
-      entiteType: 'project',
-      entiteId: project._id,
-      projet: project._id,
-      details: { nom: project.nom },
-    });
-  }
-
-  return project;
-};
-
-// Lister les projets (avec pagination)
-const getAllProjects = async (query) => {
-  const page = Number(query.page) || 1;
-  const limit = Number(query.limit) || 10;
-  const skip = (page - 1) * limit;
-
-  const projects = await Project.find()
-    .populate('proprietaire', 'nom prenom email')
-    .populate('membres.user', 'nom prenom email')
-    .sort('-dateCreation')
-    .skip(skip)
-    .limit(limit);
-
-  const total = await Project.countDocuments();
-
-  return {
-    projects,
-    pagination: {
-      total,
-      page,
-      limit,
-      pages: Math.ceil(total / limit),
-    },
-  };
-};
-
-// Récupérer un projet par ID
-const getProjectById = async (id) => {
-  const project = await Project.findById(id)
-    .populate('proprietaire', 'nom prenom email')
-    .populate('membres.user', 'nom prenom email');
-
-  if (!project) {
-    const error = new Error('Projet introuvable');
-    error.status = 404;
-    throw error;
-  }
-
-  return project;
-};
-// Modifier un projet
-const updateProject = async (id, data, userId = null) => {
-  const project = await Project.findById(id);
-
-  if (!project) {
-    const error = new Error('Projet introuvable');
-    error.status = 404;
-    throw error;
-  }
-
-  Object.assign(project, data);
-  await project.save();
-
-  // Enregistrer l'action
-  if (userId) {
-    await logActivity({
-      utilisateur: userId,
-      action: 'update',
-      entiteType: 'project',
-      entiteId: project._id,
-      projet: project._id,
-      details: { modifications: Object.keys(data) },
-    });
-  }
-  return await Project.findById(project._id)
-    .populate('proprietaire', 'nom prenom email')
-    .populate('membres.user', 'nom prenom email');
-};
-
-// Archiver un projet
-const archiveProject = async (id, userId = null) => {
-  const project = await Project.findById(id);
-
-  if (!project) {
-    const error = new Error('Projet introuvable');
-    error.status = 404;
-    throw error;
-  }
-
-  project.statut = 'archive';
-  await project.save();
-
-  // Enregistrer l'action
-  if (userId) {
-    await logActivity({
-      utilisateur: userId,
-      action: 'update',
-      entiteType: 'project',
-      entiteId: project._id,
-      projet: project._id,
-      details: { statut: 'archive' },
-    });
-  }
-
-  return project;
-};
-
+// ============================================
+// Exports
+// ============================================
 module.exports = {
   createProject,
   getAllProjects,
