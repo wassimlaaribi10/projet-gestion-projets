@@ -3,24 +3,28 @@
 // ============================================
 
 const mongoose = require('mongoose');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env.test') });
 
 // ============================================
 // Configuration AVANT tous les tests
 // ============================================
 
 beforeAll(async () => {
-  // Variables d'environnement pour les tests
-  process.env.JWT_SECRET = 'test_secret_pour_les_tests';
-  process.env.JWT_EXPIRES_IN = '1h';
+  process.env.JWT_SECRET = process.env.JWT_SECRET || 'test_secret_pour_les_tests';
+  process.env.JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
   process.env.NODE_ENV = 'test';
 
-  // Forcer DNS publics pour MongoDB Atlas (bug Windows)
+  // Forcer DNS publics pour MongoDB Atlas
   const dns = require('dns');
   dns.setServers(['8.8.8.8', '8.8.4.4']);
 
-  // Chaîne de connexion vers la base de TEST
-  const testUri =
-    'mongodb://wlaaribi_db_user:projet1986@ac-gficzd2-shard-00-00.05irgzk.mongodb.net:27017,ac-gficzd2-shard-00-01.05irgzk.mongodb.net:27017,ac-gficzd2-shard-00-02.05irgzk.mongodb.net:27017/gestion_projets_test?ssl=true&replicaSet=atlas-xf3wcs-shard-0&authSource=admin&retryWrites=true&w=majority';
+  // Lire depuis .env.test (pas de credentials en dur !)
+  const testUri = process.env.MONGODB_TEST_URI;
+
+  if (!testUri) {
+    throw new Error('MONGODB_TEST_URI manquant dans .env.test');
+  }
 
   await mongoose.connect(testUri);
 }, 60000);
@@ -31,7 +35,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   try {
-    await mongoose.connection.dropDatabase(); // Supprime la base de test
+    await mongoose.connection.dropDatabase();
     await mongoose.disconnect();
   } catch (err) {
     console.error('Erreur lors de la fermeture :', err.message);
